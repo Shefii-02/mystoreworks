@@ -38,8 +38,8 @@ class DashboardController extends Controller
     public function index()
     {
         if (Auth::check()) {
-            if (\Auth::user()->type == 'super admin') {
-                $user                       = \Auth::user();
+            if (Auth::user()->type == 'super admin') {
+                $user                       = Auth::user();
                 $user['total_user']         = $user->countCompany();
                 $user['total_paid_user']    = $user->countPaidCompany();
                 $user['total_orders']       = Order::total_orders();
@@ -47,8 +47,7 @@ class DashboardController extends Controller
                 $user['total_plan']         = Plan::total_plan();
                 $user['most_purchese_plan'] = (!empty(Plan::most_purchese_plan()) ? Plan::most_purchese_plan()->total : 0);
                 $chartData                  = $this->getOrderChart(['duration' => 'week']);
-
-                return view('dashboard.super_admin', compact('user', 'chartData'));
+                return view('admin.dashboard.super_admin', compact('user', 'chartData'));
             } else {
                 if (\Auth::user()->can('show dashboard')) {
                     $data['latestIncome']  = Revenue::where('created_by', '=', \Auth::user()->creatorId())->orderBy('id', 'desc')->limit(5)->get();

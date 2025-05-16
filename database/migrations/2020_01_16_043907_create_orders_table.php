@@ -23,6 +23,7 @@ class CreateOrdersTable extends Migration
             $table->string('card_exp_year',10)->nullable();
             $table->string('plan_name',100);
             $table->integer('plan_id');
+            $table->dateTime('plan_expire_date')->nullable();
             $table->decimal('price', 15, 2)->default('0.0');
             $table->string('price_currency',10);
             $table->string('txn_id',100);

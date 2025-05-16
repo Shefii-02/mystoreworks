@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Artisan;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class SystemController extends Controller
 {
@@ -52,8 +54,6 @@ class SystemController extends Controller
                 } else {
                     return redirect()->back()->with('error', __($path['msg']));
                 }
-
-
             }
 
             if ($request->logo_light) {
@@ -79,7 +79,6 @@ class SystemController extends Controller
                 } else {
                     return redirect()->back()->with('error', __($path['msg']));
                 }
-
             }
 
             if ($request->favicon) {
@@ -89,14 +88,14 @@ class SystemController extends Controller
                     ]
                 );
                 $favicon = 'favicon.png';
-                
+
                 $dir = 'uploads/logo/';
-                
+
                 $validation = [
                     'mimes:' . 'png',
                     'max:' . '20480',
                 ];
-                
+
                 $path = Utility::upload_file($request, 'favicon', $favicon, $dir, $validation);
 
                 if ($path['flag'] == 1) {
@@ -122,7 +121,7 @@ class SystemController extends Controller
                 'SITE_RTL' => !isset($request->SITE_RTL) ? 'off' : 'on',
             ];
             Utility::setEnvironmentValue($arrEnv);
-        
+
 
             $settings = Utility::settings();
             if (!empty($request->title_text) || !empty($request->email_verification) || !empty($request->footer_text) || !empty($request->default_language) || isset($request->display_landing_page) || isset($request->enable_signup) || isset($request->color) || isset($request->cust_theme_bg) || isset($request->cust_darklayout)) {
@@ -130,7 +129,7 @@ class SystemController extends Controller
                 if (!isset($request->display_landing_page)) {
                     $post['display_landing_page'] = 'off';
                 }
-               
+
                 if (!isset($request->enable_signup)) {
                     $post['enable_signup'] = 'off';
                 }
@@ -272,7 +271,7 @@ class SystemController extends Controller
 
             $post = [
                 'currency' => $request->currency,
-                'currency_symbol' => $request->currency_symbol, 
+                'currency_symbol' => $request->currency_symbol,
             ];
             unset($post['_token']);
             foreach ($post as $key => $data) {
@@ -1118,30 +1117,30 @@ class SystemController extends Controller
         }
         //End Khalti
 
-            // ozow
-            if (isset($request->is_ozow_enabled) && $request->is_ozow_enabled == 'on') {
+        // ozow
+        if (isset($request->is_ozow_enabled) && $request->is_ozow_enabled == 'on') {
 
-                $validator = \Validator::make(
-                    $request->all(),
-                    [
-                        'ozow_mode'         => 'required',
-                        'ozow_site_key'   => 'required',
-                        'ozow_private_key'   => 'required',
-                        'ozow_api_key'   => 'required',
-                    ]
-                );
-                if ($validator->fails()) {
-                    return redirect()->back()->with('error', $validator->getMessageBag()->first());
-                }
-
-                $post['is_ozow_enabled']    = $request->is_ozow_enabled;
-                $post['ozow_mode']          = $request->ozow_mode;
-                $post['ozow_site_key']    = $request->ozow_site_key;
-                $post['ozow_private_key']    = $request->ozow_private_key;
-                $post['ozow_api_key']    = $request->ozow_api_key;
-            } else {
-                $post['is_ozow_enabled']    = 'off';
+            $validator = \Validator::make(
+                $request->all(),
+                [
+                    'ozow_mode'         => 'required',
+                    'ozow_site_key'   => 'required',
+                    'ozow_private_key'   => 'required',
+                    'ozow_api_key'   => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                return redirect()->back()->with('error', $validator->getMessageBag()->first());
             }
+
+            $post['is_ozow_enabled']    = $request->is_ozow_enabled;
+            $post['ozow_mode']          = $request->ozow_mode;
+            $post['ozow_site_key']    = $request->ozow_site_key;
+            $post['ozow_private_key']    = $request->ozow_private_key;
+            $post['ozow_api_key']    = $request->ozow_api_key;
+        } else {
+            $post['is_ozow_enabled']    = 'off';
+        }
 
 
         foreach ($post as $key => $data) {
@@ -2168,8 +2167,21 @@ class SystemController extends Controller
 
 
                 $new_line = implode(',', [
-                    $ip, $date, $time, json_encode($request['cookie']), $device_type, $browser_language, $browser_name, $os_name,
-                    isset($query) ? $query['country'] : '', isset($query) ? $query['region'] : '', isset($query) ? $query['regionName'] : '', isset($query) ? $query['city'] : '', isset($query) ? $query['zip'] : '', isset($query) ? $query['lat'] : '', isset($query) ? $query['lon'] : ''
+                    $ip,
+                    $date,
+                    $time,
+                    json_encode($request['cookie']),
+                    $device_type,
+                    $browser_language,
+                    $browser_name,
+                    $os_name,
+                    isset($query) ? $query['country'] : '',
+                    isset($query) ? $query['region'] : '',
+                    isset($query) ? $query['regionName'] : '',
+                    isset($query) ? $query['city'] : '',
+                    isset($query) ? $query['zip'] : '',
+                    isset($query) ? $query['lat'] : '',
+                    isset($query) ? $query['lon'] : ''
                 ]);
 
                 if (!file_exists(storage_path() . '/uploads/sample/data.csv')) {
@@ -2323,5 +2335,32 @@ class SystemController extends Controller
         // } else {
         //     return redirect()->back()->with('error', 'Permission denied.');
         // }
+    }
+
+
+    public function resetPermissions()
+    {
+        // Get the authenticated user
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['error' => 'User not authenticated'], 403);
+        }
+
+        // Remove all existing permissions
+        $user->permissions()->detach();
+
+        // Get permissions from the config file (stored in config/permissions.php)
+        $defaultPermissions = config('superadmin-permissions.default');
+
+        // Assign new permissions
+        foreach ($defaultPermissions as $permission) {
+            $perm = Permission::firstOrCreate(['name' => $permission]); // Ensure permission exists
+            $user->givePermissionTo($perm);
+        }
+
+
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        return redirect()->back()->with('success', __('Permissions reset successfully'));
     }
 }

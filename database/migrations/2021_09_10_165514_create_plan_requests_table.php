@@ -20,7 +20,7 @@ class CreatePlanRequestsTable extends Migration
         Schema::create('plan_requests', function (Blueprint $table){
             $table->id();
             $table->integer('user_id');
-            $table->integer('plan_id');
+            $table->integer('plan_id')->nullable();
             $table->string('duration', 20)->default('monthly');
             $table->timestamps();
         });

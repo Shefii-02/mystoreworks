@@ -545,7 +545,7 @@ class UserController extends Controller
             $data = $this->Counter($id);
             if ($data['is_success']) {
                 $users_data = $data['response']['users_data'];
-                return view('user.companyinfo', compact('id', 'users_data'));
+                return view('admin.company.companyinfo', compact('id', 'users_data'));
             }
         } else {
             return response()->json(['error' => __('Permission denied.')], 401);

@@ -75,6 +75,7 @@ use App\Http\Controllers\NepalstePaymnetController;
 use App\Http\Controllers\FedapayController;
 use App\Http\Controllers\CinetPayController;
 use App\Http\Controllers\ContractTypeController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\KhaltiPaymentController;
 use App\Http\Controllers\OzowPaymentController;
@@ -118,7 +119,11 @@ Route::get('/login/{lang?}', [AuthenticatedSessionController::class, 'showLoginF
 
 Route::get('/password/resets/{lang?}', [AuthenticatedSessionController::class, 'showLinkRequestForm'])->name('langPass');
 
-Route::get('/', [DashboardController::class, 'index'])->name('dashboard')->middleware(['XSS', 'revalidate']);
+Route::get('/', [Controller::class, 'dashboard'])->name('dashboard')->middleware(['XSS', 'revalidate']);
+
+
+Route::get('/dashboard', [Controller::class, 'dashboard'])->name('dashboard')->middleware(['auth', 'XSS', 'revalidate']);
+
 
 Route::get('/bill/pay/{bill}', [BillController::class, 'paybill'])->name('pay.billpay');
 Route::get('/proposal/pay/{proposal}', [ProposalController::class, 'payproposal'])->name('pay.proposalpay');
@@ -134,222 +139,13 @@ Route::get('export/invoice', [InvoiceController::class, 'export'])->name('invoic
 Route::get('export/Bill', [BillController::class, 'export'])->name('Bill.export');
 Route::get('export/retainer', [RetainerController::class, 'export'])->name('retainer.export');
 
-Route::get('company-info/{id}', [UserController::class, 'CompnayInfo'])->name('company.info');
-Route::post('user-unable', [UserController::class, 'UserUnable'])->name('user.unable');
 
-Route::get('user-login/{id}', [UserController::class, 'LoginManage'])->name('users.login');
+
 
 
 //================================= Notification  ====================================//
 
-Route::resource('notification-templates', NotificationTemplatesController::class)->middleware(
-    [
-        'auth',
-        'XSS',
-    ]
-)->except('index');
-Route::get('notification-templates/{id?}/{lang?}', [NotificationTemplatesController::class, 'index'])->name('notification-templates.index')->middleware(['XSS']);
-
-Route::get('notification_template_lang/{id}/{lang?}', [NotificationTemplatesController::class, 'manageNotificationLang'])->name('manage.notification.language')->middleware(['auth', 'XSS']);
-
-
-
-Route::prefix('customer')->as('customer.')->group(
-    function () {
-        Route::get('login/{lang}', [AuthenticatedSessionController::class, 'showCustomerLoginLang'])->name('login.lang')->middleware(['XSS']);
-        Route::get('login', [AuthenticatedSessionController::class, 'showCustomerLoginForm'])->name('login')->middleware(['XSS']);
-        Route::post('login', [AuthenticatedSessionController::class, 'customerLogin'])->name('login.store')->middleware(['XSS']);
-
-
-        Route::get('/password/resets/{lang?}', [AuthenticatedSessionController::class, 'showCustomerLinkRequestForm'])->name('change.langPass');
-        Route::post('/password/email', [AuthenticatedSessionController::class, 'postCustomerEmail'])->name('password.email');
-
-        Route::get('reset-password/{token}', [AuthenticatedSessionController::class, 'getCustomerPassword'])->name('reset.password')->middleware(['XSS']);
-        Route::get('reset-password', [AuthenticatedSessionController::class, 'updateCustomerPassword'])->name('password.reset');
-
-
-        //================================= Retainer  ====================================//
-        Route::get('retainer', [RetainerController::class, 'customerRetainer'])->name('retainer')->middleware(['auth:customer', 'XSS']);
-        Route::get('retainer/{id}/show', [RetainerController::class, 'customerRetainerShow'])->name('retainer.show')->middleware(['auth:customer', 'XSS']);
-        Route::get('retainer/{id}/send', [RetainerController::class, 'customerRetainerSend'])->name('retainer.send')->middleware(['auth:customer', 'XSS']);
-
-        Route::post('retainer/{id}/send/mail', [RetainerController::class, 'customerRetainerSendMail'])->name('retainer.send.mail')->middleware(['auth:customer', 'XSS']);
-        Route::get('dashboard', [CustomerController::class, 'dashboard'])->name('dashboard')->middleware(['auth:customer', 'XSS']);
-
-
-        Route::get('invoice', [InvoiceController::class, 'customerInvoice'])->name('invoice')->middleware(['auth:customer', 'XSS']);
-        Route::get('/invoice/pay/{invoice}', [InvoiceController::class, 'payinvoice'])->name('pay.invoice')->middleware(['XSS']);
-
-        // Route::get('/retainer/pay/{retainer}', [RetainerController::class, 'payretainer'])->name('pay.retainerpay')->middleware(['XSS']);
-        Route::get('proposal', [ProposalController::class, 'customerProposal'])->name('proposal')->middleware(['auth:customer', 'XSS']);
-
-        Route::get('proposal/{id}/show', [ProposalController::class, 'customerProposalShow'])->name('proposal.show')->middleware(['auth:customer', 'XSS']);
-        Route::get('invoicesend//{id}', [InvoiceController::class, 'customerInvoiceSend'])->name('invoice.send')->middleware(['auth:customer', 'XSS']);
-        Route::post('invoice/{id}/send/mail', [InvoiceController::class, 'customerInvoiceSendMail'])->name('invoice.send.mail')->middleware(['auth:customer', 'XSS']);
-
-
-        Route::get('invoice/{id}/show', [InvoiceController::class, 'customerInvoiceShow'])->name('invoice.show')->middleware(['auth:customer', 'XSS']);
-
-        // Route::post('invoice/{id}/payment', [StripePaymentController::class, 'addpayment'])->name('invoice.payment')->middleware(['auth:customer', 'XSS']);
-        // Route::post('retainer/{id}/payment', [StripePaymentController::class, 'addretainerpayment'])->name('retainer.payment')->middleware(['auth:customer', 'XSS']);
-
-
-        Route::get('payment', [CustomerController::class, 'payment'])->name('payment')->middleware(['auth:customer', 'XSS']);
-        Route::get('transaction', [CustomerController::class, 'transaction'])->name('transaction')->middleware(['auth:customer', 'XSS']);
-        Route::post('logout', [CustomerController::class, 'customerLogout'])->name('logout')->middleware(['auth:customer', 'XSS']);
-
-
-        Route::get('profile', [CustomerController::class, 'profile'])->name('profile')->middleware(['auth:customer', 'XSS']);
-        Route::post('update-profile', [CustomerController::class, 'editprofile'])->name('update.profile')->middleware(['auth:customer', 'XSS']);
-        Route::post('billing-info', [CustomerController::class, 'editBilling'])->name('update.billing.info')->middleware(['auth:customer', 'XSS']);
-
-
-        Route::post('shipping-info', [CustomerController::class, 'editShipping'])->name('update.shipping.info')->middleware(['auth:customer', 'XSS']);
-        Route::post('change.password', [CustomerController::class, 'updatePassword'])->name('update.password')->middleware(['auth:customer', 'XSS']);
-        Route::get('change-language/{lang}', [CustomerController::class, 'changeLanquage'])->name('change.language')->middleware(['auth:customer', 'XSS']);
-
-
-        //================================= contract ====================================//
-
-        Route::resource('contract', ContractController::class)->middleware(['auth:customer', 'revalidate']);
-
-        Route::post('contract/{id}/description', [ContractController::class, 'descriptionStore'])->name('contract.description.store')->middleware(['auth:customer', 'XSS']);
-        Route::post('contract/{id}/file', [ContractController::class, 'fileUpload'])->name('contract.file.upload')->middleware(['auth:customer', 'XSS']);
-        Route::post('/contract/{id}/comment', [ContractController::class, 'commentStore'])->name('comment.store')->middleware(['auth:customer', 'XSS']);
-
-
-        Route::post('/contract/{id}/note', [ContractController::class, 'noteStore'])->name('contract.note.store')->middleware(['auth:customer', 'XSS']);
-        Route::get('contract/pdf/{id}', [ContractController::class, 'pdffromcontract'])->name('contract.download.pdf')->middleware(['auth:customer', 'XSS']);
-        Route::get('contract/{id}/get_contract', [ContractController::class, 'printContract'])->name('get.contract')->middleware(['auth:customer', 'XSS']);
-
-
-        Route::get('/signature/{id}', [ContractController::class, 'signature'])->name('signature')->middleware(['auth:customer', 'XSS']);
-        Route::post('/signaturestore', [ContractController::class, 'signatureStore'])->name('signaturestore')->middleware(['auth:customer', 'XSS']);
-        Route::get('contract/pdf/{id}', [ContractController::class, 'pdffromcontract'])->name('contract.download.pdf')->middleware(['auth:customer', 'XSS']);
-
-
-        Route::delete('/contract/{id}/file/delete/{fid}', [ContractController::class, 'fileDelete'])->name('contract.file.delete')->middleware(['auth:customer', 'XSS']);
-        Route::get('/contract/{id}/comment', [ContractController::class, 'commentDestroy'])->name('comment.destroy')->middleware(['auth:customer', 'XSS']);
-        Route::get('/contract/{id}/note', [ContractController::class, 'noteDestroy'])->name('contract.note.destroy')->middleware(['auth:customer', 'XSS']);
-        Route::post('/contract_status_edit/{id}', [ContractController::class, 'contract_status_edit'])->name('contract.status')->middleware(['auth:customer', 'XSS']);
-
-
-
-        //================================= Invoice Payment Gateways  ====================================//
-        Route::post('/paymentwall', [PaymentWallPaymentController::class, 'invoicepaymentwall'])->name('invoice.paymentwallpayment')->middleware(['XSS']);
-
-        Route::post('{id}/invoice-with-paypal', [PaypalController::class, 'customerPayWithPaypal'])->name('invoice.with.paypal')->middleware(['XSS', 'revalidate']);
-        Route::get('{id}/get-payment-status/{amount}', [PaypalController::class, 'customerGetPaymentStatus'])->name('get.payment.status')->middleware(['XSS', 'revalidate']);
-
-
-        Route::post('{id}/pay-with-paypal', [PaypalController::class, 'customerretainerPayWithPaypal'])->name('pay.with.paypal')->middleware(['XSS', 'revalidate']);
-        Route::get('{id}/{amount}/get-retainer-payment-status', [PaypalController::class, 'customerGetRetainerPaymentStatus'])->name('get.retainer.payment.status')->middleware(['XSS', 'revalidate']);
-
-        Route::post('invoice/{id}/payment', [StripePaymentController::class, 'addpayment'])->name('invoice.payment')->middleware(['XSS', 'revalidate']);
-
-
-        Route::post('/retainer-pay-with-paystack', [PaystackPaymentController::class, 'RetainerPayWithPaystack'])->name('retainer.pay.with.paystack')->middleware(['XSS:customer']);
-        Route::get('/retainer/paystack/{retainer_id}/{amount}/{pay_id}', [App\Http\Controllers\PaystackPaymentController::class, 'getRetainerPaymentStatus'])->name('retainer.paystack')->middleware(['XSS:customer']);
-
-        Route::post('/invoice-pay-with-paystack', [PaystackPaymentController::class, 'invoicePayWithPaystack'])->name('invoice.pay.with.paystack')->middleware(['XSS', 'revalidate']);
-        Route::get('/invoice/paystack/{invoice_id}/{amount}/{pay_id}', [App\Http\Controllers\PaystackPaymentController::class, 'getInvoicePaymentStatus'])->name('invoice.paystack')->middleware(['XSS', 'revalidate']);
-
-
-
-        Route::post('/retainer-pay-with-flaterwave', [FlutterwavePaymentController::class, 'retainerPayWithFlutterwave'])->name('retainer.pay.with.flaterwave')->middleware(['XSS', 'revalidate']);
-        Route::get('/retainer/flaterwave/{txref}/{retainer_id}', [App\Http\Controllers\FlutterwavePaymentController::class, 'getRetainerPaymentStatus'])->name('retainer.flaterwave')->middleware(['XSS', 'revalidate',]);
-
-        Route::post('/invoice-pay-with-flaterwave', [FlutterwavePaymentController::class, 'invoicePayWithFlutterwave'])->name('invoice.pay.with.flaterwave')->middleware(['XSS', 'revalidate']);
-        Route::get('/invoice/flaterwave/{txref}/{invoice_id}', [App\Http\Controllers\FlutterwavePaymentController::class, 'getInvoicePaymentStatus'])->name('invoice.flaterwave')->middleware(['XSS', 'revalidate',]);
-
-
-        Route::post('/retainer-pay-with-razorpay', [RazorpayPaymentController::class, 'retainerPayWithRazorpay'])->name('retainer.pay.with.razorpay')->middleware(['XSS', 'revalidate']);
-        Route::get('/retainer/razorpay/{amount}/{retainer_id}', [App\Http\Controllers\RazorpayPaymentController::class, 'getRetainerPaymentStatus'])->name('retainer.razorpay')->middleware(['XSS', 'revalidate',]);
-
-        Route::post('/invoice-pay-with-razorpay', [RazorpayPaymentController::class, 'invoicePayWithRazorpay'])->name('invoice.pay.with.razorpay')->middleware(['XSS', 'revalidate']);
-        Route::get('/invoice/razorpay/{amount}/{invoice_id}', [App\Http\Controllers\RazorpayPaymentController::class, 'getInvoicePaymentStatus'])->name('invoice.razorpay')->middleware(['XSS', 'revalidate',]);
-
-        Route::post('/retainer-pay-with-paytm', [PaytmPaymentController::class, 'retainerPayWithPaytm'])->name('retainer.pay.with.paytm')->middleware(['XSS:customer']);
-
-
-
-        Route::post('/invoice-pay-with-paytm', [PaytmPaymentController::class, 'invoicePayWithPaytm'])->name('invoice.pay.with.paytm')->middleware(['XSS:customer']);
-        Route::post('/invoice/paytm/{invoice}/{amount}', [App\Http\Controllers\PaytmPaymentController::class, 'getInvoicePaymentStatus'])->name('invoice.paytm')->middleware(['XSS:customer']);
-
-
-
-        Route::post('/retainer-pay-with-mercado', [MercadoPaymentController::class, 'retainerPayWithMercado'])->name('retainer.pay.with.mercado')->middleware(['XSS:customer']);
-        Route::any('/retainer/mercado/{retainer}', [MercadoPaymentController::class, 'getRetainerPaymentStatus'])->name('retainer.mercado')->middleware(['XSS', 'revalidate']);
-
-        Route::post('/invoice-pay-with-mercado', [MercadoPaymentController::class, 'invoicePayWithMercado'])->name('invoice.pay.with.mercado')->middleware(['XSS', 'revalidate']);
-        Route::any('/invoice/mercado/{invoice}', [MercadoPaymentController::class, 'getInvoicePaymentStatus'])->name('invoice.mercado')->middleware(['XSS', 'revalidate']);
-
-
-        Route::post('/retainer-pay-with-mollie', [MolliePaymentController::class, 'retainerPayWithMollie'])->name('retainer.pay.with.mollie')->middleware(['XSS', 'revalidate']);
-
-        Route::post('/invoice-pay-with-mollie', [MolliePaymentController::class, 'invoicePayWithMollie'])->name('invoice.pay.with.mollie')->middleware(['XSS', 'revalidate']);
-        Route::get('/invoice/mollie/{invoice}/{amount}', [MolliePaymentController::class, 'getInvoicePaymentStatus'])->name('invoice.mollie')->middleware(['XSS', 'revalidate']);
-
-
-        Route::post('/retainer-pay-with-skrill', [SkrillPaymentController::class, 'retainerPayWithSkrill'])->name('retainer.pay.with.skrill')->middleware(['XSS', 'revalidate']);
-        Route::get('/retainer/skrill/{retainer}/{amount}', [SkrillPaymentController::class, 'getRetainerPaymentStatus'])->name('retainer.skrill')->middleware(['XSS', 'revalidate']);
-
-
-        Route::post('/invoice-pay-with-skrill', [SkrillPaymentController::class, 'invoicePayWithSkrill'])->name('invoice.pay.with.skrill')->middleware(['XSS', 'revalidate']);
-        Route::get('/invoice/skrill/{invoice}/{amount}', [SkrillPaymentController::class, 'getInvoicePaymentStatus'])->name('invoice.skrill')->middleware(['XSS', 'revalidate']);
-
-        Route::post('/retainer-pay-with-coingate', [CoingatePaymentController::class, 'retainerPayWithCoingate'])->name('retainer.pay.with.coingate')->middleware(['XSS', 'revalidate']);
-        Route::get('/retainer/coingate/{retainer}/{amount}', [CoingatePaymentController::class, 'getRetainerPaymentStatus'])->name('retainer.coingate')->middleware(['XSS', 'revalidate']);
-
-        Route::post('/invoice-pay-with-coingate', [CoingatePaymentController::class, 'invoicePayWithCoingate'])->name('invoice.pay.with.coingate')->middleware(['XSS', 'revalidate']);
-        Route::get('/invoice/coingate/{invoice}/{amount}', [CoingatePaymentController::class, 'getInvoicePaymentStatus'])->name('invoice.coingate')->middleware(['XSS', 'revalidate']);
-    }
-);
-
-Route::prefix('vender')->as('vender.')->group(
-    function () {
-
-        Route::get('login/{lang}', [AuthenticatedSessionController::class, 'showVenderLoginLang'])->name('login.lang')->middleware(['XSS']);
-        Route::get('login', [AuthenticatedSessionController::class, 'showVenderLoginForm'])->name('login')->middleware(['XSS']);
-        Route::post('login', [AuthenticatedSessionController::class, 'VenderLogin'])->name('login.store')->middleware(['XSS']);
-
-
-        Route::get('/password/resets/{lang?}', [AuthenticatedSessionController::class, 'showVendorLinkRequestForm'])->name('change.langPass')->middleware(['XSS']);
-        Route::post('/password/email', [AuthenticatedSessionController::class, 'postVendorEmail'])->name('password.email')->middleware(['XSS']);
-        Route::get('reset-password/{token}', [AuthenticatedSessionController::class, 'getVendorPassword'])->name('reset.password')->middleware(['XSS']);
-        Route::post('reset-password', [AuthenticatedSessionController::class, 'updateVendorPassword'])->name('password.reset')->middleware(['XSS']);
-
-
-
-        Route::get('dashboard', [VenderController::class, 'dashboard'])->name('dashboard')->middleware(['auth:vender', 'XSS', 'revalidate']);
-        Route::get('bill', [BillController::class, 'VenderBill'])->name('bill')->middleware(['auth:vender', 'XSS', 'revalidate']);
-        Route::get('bill/{id}/show', [BillController::class, 'venderBillShow'])->name('bill.show')->middleware(['auth:vender', 'XSS', 'revalidate']);
-
-
-        Route::get('bill/{id}/send', [BillController::class, 'venderBillSend'])->name('bill.send')->middleware(['auth:vender', 'XSS', 'revalidate']);
-        Route::post('bill/{id}/send/mail', [BillController::class, 'venderBillSendMail'])->name('bill.send.mail')->middleware(['auth:vender', 'XSS', 'revalidate']);
-        Route::get('payment', [VenderController::class, 'payment'])->name('payment')->middleware(['auth:vender', 'XSS', 'revalidate']);
-
-
-        Route::get('transaction', [VenderController::class, 'transaction'])->name('transaction')->middleware(['auth:vender', 'XSS', 'revalidate']);
-        Route::post('logout', [VenderController::class, 'venderLogout'])->name('logout')->middleware(['auth:vender', 'XSS', 'revalidate']);
-        Route::get('profile', [VenderController::class, 'profile'])->name('profile')->middleware(['auth:vender', 'XSS', 'revalidate']);
-
-
-        Route::post('update-profile', [VenderController::class, 'editprofile'])->name('update.profile')->middleware(['auth:vender', 'XSS', 'revalidate']);
-        Route::post('billing-info', [VenderController::class, 'editBilling'])->name('update.billing.info')->middleware(['auth:vender', 'XSS', 'revalidate']);
-        Route::post('shipping-info', [VenderController::class, 'editShipping'])->name('update.shipping.info')->middleware(['auth:vender', 'XSS', 'revalidate']);
-
-
-        Route::post('change.password', [VenderController::class, 'updatePassword'])->name('update.password')->middleware(['auth:vender', 'XSS', 'revalidate']);
-        Route::get('change-language/{lang}', [VenderController::class, 'changeLanquage'])->name('change.language')->middleware(['auth:vender', 'XSS', 'revalidate']);
-    }
-);
-
-
 Route::any('/cookie-consent', [SystemController::class, 'CookieConsent'])->name('cookie-consent');
-Route::post('cookie-setting', [SystemController::class, 'saveCookieSettings'])->name('cookie.setting');
-Route::post('chatgptkey', [SystemController::class, 'chatgptkey'])->name('settings.chatgptkey');
 Route::get('generate/{template_name}', [AiTemplateController::class, 'create'])->name('generate');
 Route::post('generate/keywords/{id}', [AiTemplateController::class, 'getKeywords'])->name('generate.keywords');
 Route::post('generate/response', [AiTemplateController::class, 'AiGenerate'])->name('generate.response');
@@ -466,13 +262,7 @@ Route::group(['middleware' => ['verified']], function () {
 
 
     //================================= Email Templates  ====================================//
-    Route::get('email_template_lang/{id}/{lang?}', [EmailTemplateController::class, 'manageEmailLang'])->name('manage.email.language')->middleware(['auth', 'XSS']);
-    Route::put('email_template_store/{pid}', [EmailTemplateController::class, 'storeEmailLang'])->name('store.email.language')->middleware(['auth']);
-    Route::post('email_template_status', [EmailTemplateController::class, 'updateStatus'])->name('status.email.language')->middleware(['auth']);
-
-    Route::resource('email_template', EmailTemplateController::class)->middleware(['auth']);
-
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware(['auth', 'XSS', 'revalidate']);
+   
     Route::get('user/{id}/plan', [UserController::class, 'upgradePlan'])->name('plan.upgrade')->middleware(['XSS', 'revalidate']);
 
     Route::get('user/{id}/plan/{pid}', [UserController::class, 'activePlan'])->name('plan.active')->middleware(['XSS', 'revalidate']);
@@ -480,15 +270,12 @@ Route::group(['middleware' => ['verified']], function () {
     Route::post('edit-profile', [UserController::class, 'editprofile'])->name('update.account')->middleware(['XSS', 'revalidate']);
 
 
-    Route::resource('users', UserController::class)->middleware(['auth', 'XSS', 'revalidate']);
 
     Route::post('change-password', [UserController::class, 'updatePassword'])->name('update.password');
-    Route::any('user-reset-password/{id}', [UserController::class, 'userPassword'])->name('users.reset');
-    Route::post('user-reset-password/{id}', [UserController::class, 'userPasswordReset'])->name('user.password.update');
     Route::get('change-language/{lang}', [UserController::class, 'changeMode'])->name('change.mode');
 
 
-    Route::resource('roles', RoleController::class)->middleware(['auth', 'XSS', 'revalidate']);
+   
     Route::resource('permissions', PermissionController::class)->middleware(['auth', 'XSS', 'revalidate']);
 
 
@@ -511,42 +298,6 @@ Route::group(['middleware' => ['verified']], function () {
         }
     );
 
-    Route::group(
-        [
-            'middleware' => [
-                'auth',
-                'XSS', 'revalidate',
-            ],
-        ],
-        function () {
-
-
-            Route::resource('settings', SystemController::class);
-
-            Route::post('email-settings', [SystemController::class, 'saveEmailSettings'])->name('email.settings');
-            Route::post('company-settings', [SystemController::class, 'saveCompanySettings'])->name('company.settings');
-
-            Route::post('stripe-settings', [SystemController::class, 'savePaymentSettings'])->name('payment.settings');
-            Route::post('system-settings', [SystemController::class, 'saveSystemSettings'])->name('system.settings');
-            Route::post('recaptcha-settings', [SystemController::class, 'recaptchaSettingStore'])->name('recaptcha.settings.store');
-            Route::post('storage-settings', [SystemController::class, 'storageSettingStore'])->name('storage.setting.store');
-
-            Route::get('company-setting', [SystemController::class, 'companyIndex'])->name('company.setting');
-            Route::post('business-setting', [SystemController::class, 'saveBusinessSettings'])->name('business.setting');
-            Route::any('twilio-settings', [SystemController::class, 'saveTwilioSettings'])->name('twilio.settings');
-            Route::post('company-payment-setting', [SystemController::class, 'saveCompanyPaymentSettings'])->name('company.payment.settings');
-
-
-            Route::post('test', [SystemController::class, 'testMail'])->name('test.mail');
-            Route::post('test-mail', [SystemController::class, 'testSendMail'])->name('test.send.mail');
-
-            Route::post('setting/seo', [SystemController::class, 'SeoSettings'])->name('seo.settings');
-
-            Route::resource('webhook', WebhookController::class);
-
-            Route::post('company-email-settings', [SystemController::class, 'saveCompanyEmailSetting'])->name('company.email.settings');
-        }
-    );
 
     Route::get('productservice/index', [ProductServiceController::class, 'index'])->name('productservice.index')->middleware(['auth', 'XSS']);
     Route::get('export/productservice', [ProductServiceController::class, 'export'])->name('productservice.export');
@@ -783,9 +534,7 @@ Route::group(['middleware' => ['verified']], function () {
     // Route::delete('order/{id}', [BankTransferController::class,'destroy'])->name('order.destroy');
 
     Route::resource('payment', PaymentController::class)->except('index')->middleware(['auth', 'XSS', 'revalidate']);
-    Route::resource('plans', PlanController::class)->middleware(['auth', 'XSS', 'revalidate']);
-    Route::get('plan/plan-trial/{id}', [PlanController::class, 'PlanTrial'])->name('plan.trial');
-    Route::post('plan-disable', [PlanController::class, 'planDisable'])->name('plan.disable')->middleware(['auth', 'XSS', 'revalidate']);
+
     Route::resource('expenses', ExpenseController::class)->middleware(['auth', 'XSS', 'revalidate']);
 
     Route::group(
@@ -1004,21 +753,7 @@ Route::group(['middleware' => ['verified']], function () {
     Route::any('/midtrans', [MidtransController::class, 'planPayWithMidtrans'])->name('plan.get.midtrans');
     Route::any('/midtrans/callback', [MidtransController::class, 'planGetMidtransStatus'])->name('plan.get.midtrans.status');
 
-    Route::group(
-        [
-            'middleware' => [
-                'auth',
-                'XSS',
-                'revalidate',
-            ],
-        ],
-        function () {
-            Route::get('order', [StripePaymentController::class, 'index'])->name('order.index');
-            Route::get('/refund/{id}/{user_id}', [StripePaymentController::class, 'refund'])->name('order.refund');
-            Route::get('/stripe/{code}', [StripePaymentController::class, 'stripe'])->name('stripe');
-            Route::post('/stripe', [StripePaymentController::class, 'stripePost'])->name('stripe.post');
-        }
-    );
+ 
     Route::post('plan-pay-with-paypal', [PaypalController::class, 'planPayWithPaypal'])->name('plan.pay.with.paypal')->middleware(['auth', 'XSS', 'revalidate']);
     Route::get('{id}/plan-get-payment-status/{amount}', [PaypalController::class, 'planGetPaymentStatus'])->name('plan.get.payment.status')->middleware(['auth', 'XSS', 'revalidate']);
 
@@ -1057,13 +792,7 @@ Route::group(['middleware' => ['verified']], function () {
     Route::any('plan-get-ozow-status', [OzowPaymentController::class, 'planGetozowStatus'])->name('plan.get.ozow.status');
 
 
-    // Plan Request Module
-    Route::get('plan_request', [PlanRequestController::class, 'index'])->name('plan_request.index')->middleware(['auth', 'XSS',]);
-    Route::get('request_frequency/{id}', [PlanRequestController::class, 'requestView'])->name('request.view')->middleware(['auth', 'XSS',]);
-    Route::get('request_send/{id}', [PlanRequestController::class, 'userRequest'])->name('send.request')->middleware(['auth', 'XSS',]);
-    Route::get('request_response/{id}/{response}', [PlanRequestController::class, 'acceptRequest'])->name('response.request')->middleware(['auth', 'XSS',]);
-    Route::get('request_cancel/{id}', [PlanRequestController::class, 'cancelRequest'])->name('request.cancel')->middleware(['auth', 'XSS',]);
-
+   
     // Referral program
     Route::get('referral-program/company', [ReferralProgramController::class, 'companyIndex'])->name('referral-program.company')->middleware(['auth','XSS']);
 	Route::resource('referral-program', ReferralProgramController::class)->middleware(['auth','XSS']);
@@ -1306,3 +1035,8 @@ Route::any('/retainer-get-ozow-status/{id}',[OzowPaymentController::class,'getRe
 
 
 Route::get('{id}/{amount}/get-retainer-payment-status', [PaypalController::class,'customerGetRetainerPaymentStatus'])->name('get.retainer.payment.status')->middleware(['XSS', 'revalidate']);
+
+
+require __DIR__ . '/admin.php';
+require __DIR__ . '/companies.php';
+require __DIR__ . '/customer.php';

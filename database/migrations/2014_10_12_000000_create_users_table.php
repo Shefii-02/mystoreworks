@@ -19,6 +19,7 @@ class CreateUsersTable extends Migration
                 $table->bigIncrements('id');
                 $table->string('name');
                 $table->string('email');
+                $table->string('mobile')->nullable();
                 $table->timestamp('email_verified_at')->nullable();
                 $table->string('password')->nullable();
                 $table->string('type', 20);
@@ -33,6 +34,7 @@ class CreateUsersTable extends Migration
                 $table->integer('is_active')->default(1);
                 $table->rememberToken();
                 $table->datetime('last_login_at')->nullable();
+                $table->integer('parent')->nullable();
                 $table->timestamps();
             }
         );

@@ -65,14 +65,16 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request)
     {
-        $user = User::where('email',$request->email)->first();
-        if($user != null && $user->is_disable == 0 && $user->type != 'company' && $user->type != 'super admin')
-        {
+
+        $user = User::where('email', $request->email)->first();
+
+        $allowedTypes = ['company', 'super admin', 'admin staff', 'company staff', 'vendor', 'customer'];
+
+        if ($user != null && $user->is_disable == 0 && !in_array($user->type, $allowedTypes)) {
             return redirect()->back()->with('status', __('Your Account is disable,please contact your Administrator.'));
         }
 
-        if($user != null && $user->is_enable_login == 0 && $user->type != 'super admin')
-        {
+        if ($user != null && $user->is_enable_login == 0 && $user->type != 'super admin' && $user->type != 'admin staff' && $user->type != 'company') {
             return redirect()->back()->with('status', __('Your Account is disable from company.'));
         }
 
@@ -87,13 +89,10 @@ class AuthenticatedSessionController extends Controller
         // $this->validate($request, $validation);
         $validation = [];
 
-        if(isset($settings['recaptcha_module']) && $settings['recaptcha_module'] == 'yes')
-        {
-            if($settings['google_recaptcha_version'] == 'v2-checkbox'){
+        if (isset($settings['recaptcha_module']) && $settings['recaptcha_module'] == 'yes') {
+            if ($settings['google_recaptcha_version'] == 'v2-checkbox') {
                 $validation['g-recaptcha-response'] = 'required';
-            }
-            elseif($settings['google_recaptcha_version'] == 'v3')
-            {
+            } elseif ($settings['google_recaptcha_version'] == 'v3') {
                 $result = event(new VerifyReCaptchaToken($request));
 
                 if (!isset($result[0]['status']) || $result[0]['status'] != true) {
@@ -102,10 +101,10 @@ class AuthenticatedSessionController extends Controller
 
                     $validation['g-recaptcha-response'] = 'required';
                 }
-            }else{
+            } else {
                 $validation = [];
             }
-        }else{
+        } else {
             $validation = [];
         }
         $this->validate($request, $validation);
@@ -115,6 +114,8 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = Auth::user();
+
+
         if ($user->delete_status == 0) {
             auth()->logout();
         }
@@ -163,19 +164,19 @@ class AuthenticatedSessionController extends Controller
             }
         }
 
-        if ($user->type == 'company') {
+        if ($user->type == 'company' || $user->type == 'company staff') {
             $plan = Plan::find($user->plan);
-            if(!empty($plan)){
+            if (!empty($plan)) {
                 if ($user->plan != $plan->id) {
                     if (date('Y-m-d') > $user->plan_expire_date) {
                         $user->plan             = $plan->id;
                         $user->plan_expire_date = null;
-                            $user->save();
-    
+                        $user->save();
+
                         $users     = User::where('created_by', '=', \Auth::user()->creatorId())->get();
                         $customers = Customer::where('created_by', '=', \Auth::user()->creatorId())->get();
                         $venders   = Vender::where('created_by', '=', \Auth::user()->creatorId())->get();
-    
+
                         if ($plan->max_users == -1) {
                             foreach ($users as $user) {
                                 $user->is_active = 1;
@@ -194,8 +195,8 @@ class AuthenticatedSessionController extends Controller
                                 }
                             }
                         }
-    
-    
+
+
                         if ($plan->max_customers == -1) {
                             foreach ($customers as $customer) {
                                 $customer->is_active = 1;
@@ -214,7 +215,7 @@ class AuthenticatedSessionController extends Controller
                                 }
                             }
                         }
-    
+
                         if ($plan->max_venders == -1) {
                             foreach ($venders as $vender) {
                                 $vender->is_active = 1;
@@ -233,7 +234,7 @@ class AuthenticatedSessionController extends Controller
                                 }
                             }
                         }
-    
+
                         if ($plan) {
                             if ($plan->duration != 'lifetime') {
                                 $datetime1 = new \DateTime($user->plan_expire_date);
@@ -243,28 +244,32 @@ class AuthenticatedSessionController extends Controller
                                 $days     = $interval->format('%r%a');
                                 if ($days <= 0) {
                                     $user->assignPlan(1);
-    
+
                                     return redirect()->intended(RouteServiceProvider::HOME)->with('error', __('Your Plan is expired.'));
                                 }
                             }
-    
+
                             if ($user->trial_expire_date != null) {
                                 if (\Auth::user()->trial_expire_date > date('Y-m-d')) {
                                     $user->assignPlan(1);
-    
+
                                     return redirect()->intended(RouteServiceProvider::HOME)->with('error', __('Your Trial plan Expired.'));
                                 }
                             }
                         }
-    
+
                         return redirect()->route('dashboard')->with('error', 'Your plan expired limit is over, please upgrade your plan');
                     }
                 }
-            }else{
+            } else {
                 return redirect()->back()->with('error', __('Something went wrong.'));
             }
-           
         }
+
+     
+
+
+
 
         return redirect()->intended(RouteServiceProvider::HOME);
     }
@@ -310,22 +315,18 @@ class AuthenticatedSessionController extends Controller
 
     public function customerLogin(Request $request)
     {
-        $customer = Customer::where('email',$request->email)->first();
+        $customer = Customer::where('email', $request->email)->first();
 
-        if($customer != null && $customer->is_enable_login == 0 && $customer->type != 'super admin')
-        {
+        if ($customer != null && $customer->is_enable_login == 0 && $customer->type != 'super admin') {
             return redirect()->back()->with('status', __('Your Account is disable from customer.'));
         }
         // ReCpatcha
         $settings = Utility::settings();
         $validation = [];
-        if(isset($settings['recaptcha_module']) && $settings['recaptcha_module'] == 'yes')
-        {
-            if($settings['google_recaptcha_version'] == 'v2-checkbox'){
+        if (isset($settings['recaptcha_module']) && $settings['recaptcha_module'] == 'yes') {
+            if ($settings['google_recaptcha_version'] == 'v2-checkbox') {
                 $validation['g-recaptcha-response'] = 'required';
-            }
-            elseif($settings['google_recaptcha_version'] == 'v3')
-            {
+            } elseif ($settings['google_recaptcha_version'] == 'v3') {
                 $result = event(new VerifyReCaptchaToken($request));
 
                 if (!isset($result[0]['status']) || $result[0]['status'] != true) {
@@ -334,10 +335,10 @@ class AuthenticatedSessionController extends Controller
 
                     $validation['g-recaptcha-response'] = 'required';
                 }
-            }else{
+            } else {
                 $validation = [];
             }
-        }else{
+        } else {
             $validation = [];
         }
         $this->validate($request, $validation);
@@ -431,22 +432,18 @@ class AuthenticatedSessionController extends Controller
 
     public function venderLogin(Request $request)
     {
-        $vender = Vender::where('email',$request->email)->first();
-        if($vender != null && $vender->is_enable_login == 0 && $vender->type != 'super admin')
-        {
+        $vender = Vender::where('email', $request->email)->first();
+        if ($vender != null && $vender->is_enable_login == 0 && $vender->type != 'super admin') {
             return redirect()->back()->with('status', __('Your Account is disable from vendor.'));
         }
 
         // ReCpatcha
         $settings = Utility::settings();
         $validation = [];
-        if(isset($settings['recaptcha_module']) && $settings['recaptcha_module'] == 'yes')
-        {
-            if($settings['google_recaptcha_version'] == 'v2-checkbox'){
+        if (isset($settings['recaptcha_module']) && $settings['recaptcha_module'] == 'yes') {
+            if ($settings['google_recaptcha_version'] == 'v2-checkbox') {
                 $validation['g-recaptcha-response'] = 'required';
-            }
-            elseif($settings['google_recaptcha_version'] == 'v3')
-            {
+            } elseif ($settings['google_recaptcha_version'] == 'v3') {
                 $result = event(new VerifyReCaptchaToken($request));
 
                 if (!isset($result[0]['status']) || $result[0]['status'] != true) {
@@ -455,10 +452,10 @@ class AuthenticatedSessionController extends Controller
 
                     $validation['g-recaptcha-response'] = 'required';
                 }
-            }else{
+            } else {
                 $validation = [];
             }
-        }else{
+        } else {
             $validation = [];
         }
         $this->validate($request, $validation);

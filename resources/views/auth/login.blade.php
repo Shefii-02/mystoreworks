@@ -8,27 +8,7 @@
     {{ __('Login') }}
 @endsection
 
-@section('auth-lang')
-    @php
-        $languages = App\Models\Utility::languages();
-    @endphp
-    <div class="lang-dropdown-only-desk">
-        <li class="dropdown dash-h-item drp-language">
-            <a class="dash-head-link dropdown-toggle btn" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                <span class="drp-text"> {{ ucFirst('en') }}
-                </span>
-            </a>
-            <div class="dropdown-menu dash-h-dropdown dropdown-menu-end">
-                @foreach ($languages as $code => $language)
-                    <a href="{{ route('login', $code) }}" tabindex="0"
-                        class="dropdown-item {{ $code == $lang ? 'active' : '' }}">
-                        <span>{{ ucFirst($language) }}</span>
-                    </a>
-                @endforeach
-            </div>
-        </li>
-    </div>
-@endsection
+
 
 @section('content')
     <div class="d-flex align-items-center justify-content-between">
@@ -83,7 +63,7 @@
                 </div>
             @endif
         @endif
-        <div class="form-group mb-4">
+        <div class="form-group mb-4 ">
             @if (Route::has('password.request'))
                 <a href="{{ route('password.request', $lang) }}"
                     class="text-xs d-flex align-items-center justify-content-between">{{ __('Forgot Your Password?') }}</a>
@@ -98,17 +78,7 @@
                     class="text-primary">{{ __('Register') }}</a></p>
         @endif
 
-        <div class="row">   
-            <div class="col-6 d-grid">
-                <a href="{{ route('customer.login') }}"
-                    class="btn-login btn btn-secondary btn-block mt-2 text-white">{{ __('Customer Login') }}</a>
-
-            </div>
-            <div class="col-6 d-grid">
-                <a href="{{ route('vender.login') }}"
-                    class="btn-login btn btn-secondary btn-block mt-2 text-white">{{ __('Vendor Login') }}</a>
-            </div>
-        </div>
+       
 
     </div>
     {{ Form::close() }}

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 @php
-    use \App\Models\Utility;
+    use App\Models\Utility;
     $logo = \App\Models\Utility::get_file('uploads/logo/');
     $company_logo = \App\Models\Utility::get_superadmin_logo();
     $seo_setting = App\Models\Utility::getSeoSetting();
@@ -24,7 +24,6 @@
         $themeColor = $color;
     }
 
-
     $SITE_RTL = 'theme-3';
     if (!empty($setting['SITE_RTL'])) {
         $SITE_RTL = $setting['SITE_RTL'];
@@ -39,7 +38,7 @@
 
 <head>
     <title>
-        {{ Utility::getValByName('title_text') ? Utility::getValByName('title_text') : config('app.name', 'Accountgo') }}
+        {{ Utility::getValByName('title_text') ? Utility::getValByName('title_text') : config('app.name', 'Dr Computer') }}
         - @yield('page-title')</title>
 
     <meta charset="utf-8" />
@@ -107,55 +106,46 @@
     @endif
 </head>
 
-<body class="{{ $themeColor }}">
+<body class="{{ $themeColor }} bg-primary h-100">
     <!-- [custom-login] start -->
-    <div class="custom-login">
-        <div class="login-bg-img">
-            <img src="{{ asset('assets/images/auth/' . $color_image . '.svg') }}" class="login-bg-1">
-            {{-- <img src="{{ isset($settings['color_flag']) && $settings['color_flag'] == 'false' ? asset('assets/images/auth/'.$color.'.svg') : asset('assets/images/auth/theme-3.svg') }}" class="login-bg-1"> --}}
-            <img src="{{ asset('assets/images/auth/common.svg') }}" class="login-bg-2">
-        </div>
-        <div class="bg-login bg-primary"></div>
+    <div class="custom-login m-0 p-0  bg-primary">
         <div class="custom-login-inner">
-            <header class="dash-header">
-                <nav class="navbar navbar-expand-md default">
-                    <div class="container-fluid pe-2">
-                        <div class="navbar-brand">
-                            <a href="">
-                                <img src="{{ $logo . (isset($company_logo) && !empty($company_logo) ? $company_logo : 'logo-dark.png') . '?' . time() }}"
-                                    class="logo" alt="{{ config('app.name', 'AccountGo') }}" class="logo logo-lg"
-                                    loading="lazy" style="height: 40px" />
-                            </a>
-                        </div>
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#navbarlogin">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
-                        <div class="collapse navbar-collapse" id="navbarlogin">
-                            <ul class="navbar-nav align-items-center ms-auto mb-2 mb-lg-0">
-                                @include('landingpage::layouts.buttons')
-                                @yield('auth-lang')
-                            </ul>
+
+            <main class="custom-wrapper">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="custom-row  justify-content-center px-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    @yield('content')
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </nav>
-            </header>
-            <main class="custom-wrapper">
-                <div class="custom-row">
-                    <div class="card">
-                        <div class="card-body">
-                            @yield('content')
-                        </div>
+                    <div class="col-lg-4"
+                        style="position: relative;
+                                        z-index: 1;
+                                        ">
+                        <img class="d-none d-lg-block"
+                            style="transform: translateX(20%);
+                                                        border-radius: 36px;
+                                                        margin-left: auto;
+                                                        display: block;
+                                                        width: 750px;"
+                            src="https://demo7.drcomputers.online/assets/images/landing/auth_page.png" />
+
+
                     </div>
                 </div>
+
             </main>
             <footer>
                 <div class="auth-footer">
                     <div class="container">
                         <div class="row">
                             <div class="col-12">
-                                <span>{{ __('©') }} {{ date('Y') }}
-                                    {{ Utility::getValByName('footer_text') ? Utility::getValByName('footer_text') : config('app.name', 'AccountGo') }}
+                                <span class="text-light">{{ __('©') }} {{ date('Y') }}
+                                    {{ Utility::getValByName('footer_text') ? Utility::getValByName('footer_text') : config('app.name', 'Dr Computer') }}
                                 </span>
                             </div>
                         </div>

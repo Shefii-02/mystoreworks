@@ -25,6 +25,7 @@ class CreatePlansTable extends Migration
             $table->text('description')->nullable();
             $table->string('image')->nullable();
             $table->string('enable_chatgpt')->default('off');
+            $table->string('business_type')->nullable();
             $table->timestamps();
         });
     }

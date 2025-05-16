@@ -59,7 +59,7 @@
     <meta property="twitter:image" content={{ asset(Storage::url('uploads/metaevent/' . $seo_setting['meta_image'])) }}>
 
     <title>
-        {{ \App\Models\Utility::getValByName('title_text') ? App\Models\Utility::getValByName('title_text') : config('app.name', 'AccountGo') }}
+        {{ \App\Models\Utility::getValByName('title_text') ? App\Models\Utility::getValByName('title_text') : config('app.name', 'Dr Computer') }}
         - @yield('page-title')</title>
     <link rel="icon"
         href="{{ $logo . '/' . (isset($company_favicon) && !empty($company_favicon) ? $company_favicon : 'favicon.png') }}"

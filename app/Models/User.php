@@ -77,6 +77,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->id;
     }
 
+    public function company(){
+        return $this->hasOne('App\Models\Company', 'user_id', 'id');
+    }
+
     public function creatorId()
     {
         if ($this->type == 'company' || $this->type == 'super admin') {
@@ -103,6 +107,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function priceFormat($price)
     {
+        
         $settings = Utility::settings();
 
         if ($settings['decimal_number'] != '') {
@@ -113,7 +118,7 @@ class User extends Authenticatable implements MustVerifyEmail
         // dd($settings, $price,  number_format($price, $settings['decimal_number']));
         // $price = floatval($price);
 
-        return (($settings['site_currency_symbol_position'] == "pre") ? $settings['site_currency_symbol'] : '') . number_format($price, $settings['decimal_number']) . (($settings['site_currency_symbol_position'] == "post") ? $settings['site_currency_symbol'] : '');
+        return (($settings['site_currency_symbol_position'] == "pre") ? $settings['site_currency_symbol'].' ' : '') . number_format($price, $settings['decimal_number']) . (($settings['site_currency_symbol_position'] == "post") ? $settings['site_currency_symbol'] : '');
     }
 
 

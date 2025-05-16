@@ -1,5 +1,5 @@
 @php
-    use \App\Models\Utility;
+    use App\Models\Utility;
     // $logo=asset(Storage::url('uploads/logo/'));
     $logo = \App\Models\Utility::get_file('uploads/logo/');
     $company_favicon = Utility::getValByName('company_favicon');
@@ -8,11 +8,9 @@
     $setting = \App\Models\Utility::getLayoutsSetting();
     $color = !empty($setting['color']) ? $setting['color'] : 'theme-3';
     $settings = \App\Models\Utility::settings();
-    if(isset($settings['color_flag']) && $settings['color_flag'] == 'true')
-    {
+    if (isset($settings['color_flag']) && $settings['color_flag'] == 'true') {
         $themeColor = 'custom-color';
-    }
-    else {
+    } else {
         $themeColor = $color;
     }
     $SITE_RTL = 'theme-3';
@@ -30,7 +28,7 @@
 
 <head>
     <title>
-        {{ Utility::getValByName('title_text') ? Utility::getValByName('title_text') : config('app.name', 'AccountGo SaaS') }}
+        {{ Utility::getValByName('title_text') ? Utility::getValByName('title_text') : config('app.name', 'Dr Computer SaaS') }}
         - @yield('page-title')</title>
     <script src="{{ asset('js/html5shiv.js') }}"></script>
     <script src="{{ asset('js/respond.min.js') }}"></script>
@@ -77,6 +75,8 @@
 
     <!--bootstrap switch-->
     <link rel="stylesheet" href="{{ asset('assets/css/plugins/bootstrap-switch-button.min.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 
 
     <!-- font css -->
@@ -113,7 +113,7 @@
 
     <style>
         :root {
-            --color-customColor: <?= $color ?>;
+            --color-customColor: <?=$color ?>;
         }
     </style>
     <link rel="stylesheet" href="{{ asset('css/custom-color.css') }}">
@@ -146,6 +146,9 @@
             margin-left: 10px !important;
         }
     </style>
+    {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous">
+    </script> --}}
 </head>
 
 <body class="{{ $themeColor }}">
@@ -156,10 +159,10 @@
         </div>
     </div>
 
-    @include('partials.admin.menu')
+    @include('admin.partials.menu')
     <!-- [ navigation menu ] end -->
     <!-- [ Header ] start -->
-    @include('partials.admin.header')
+    @include('admin.partials.header')
 
     <!-- Modal -->
     <div class="modal notification-modal fade" id="notification-modal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -249,7 +252,18 @@
             <!-- [ Main Content ] end -->
         </div>
     </div>
-    <div class="modal fade" id="commonModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+
+    <div class="offcanvas offcanvas-end" id="commonModal" tabindex="-1" aria-labelledby="exampleModalLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="exampleModalLabel"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <!-- AJAX Content will be loaded here -->
+        </div>
+    </div>
+
+    {{-- <div class="modal fade" id="commonModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -261,7 +275,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
     <div class="modal fade" id="commonModalOver" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -286,7 +300,8 @@
             </div>
         </div>
     </div>
-    @include('partials.admin.footer')
+    @include('admin.partials.footer')
+
 </body>
 @if ($set_cookie['enable_cookie'] == 'on')
     @include('layouts.cookie_consent')

@@ -46,14 +46,14 @@ class StripePaymentController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            return view('order.index', compact('orders', 'userOrders'));
+            return view('admin.order.index', compact('orders', 'userOrders'));
         } else {
             $orders = Order::select([
                 'orders.*',
                 'users.name as user_name',
             ])->join('users', 'orders.user_id', '=', 'users.id')->orderBy('orders.created_at', 'DESC')->where('users.id', '=', $objUser->id)->with('total_coupon_used.coupon_detail')->with(['total_coupon_used.coupon_detail'])->get();
 
-            return view('order.index', compact('orders'));
+            return view('admin.order.index', compact('orders'));
         }
     }
 

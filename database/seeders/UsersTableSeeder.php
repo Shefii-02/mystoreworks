@@ -1180,31 +1180,9 @@ class UsersTableSeeder extends Seeder
                 'created_by' => 0,
             ]
         );
-        $superAdminPermissions = [
-            'manage user',
-            'create user',
-            'edit user',
-            'delete user',
-            'create language',
-            'manage system settings',
-            'manage stripe settings',
-            'manage role',
-            'create role',
-            'edit role',
-            'delete role',
-            'manage permission',
-            'create permission',
-            'edit permission',
-            'delete permission',
-            'manage plan',
-            'create plan',
-            'edit plan',
-            'manage order',
-            'manage coupon',
-            'create coupon',
-            'edit coupon',
-            'delete coupon',
-        ];
+
+        $superAdminPermissions = config('superadmin-permissions.default');
+
         $superAdminRole->givePermissionTo($superAdminPermissions);
 
         $superAdmin = User::create(
@@ -1219,6 +1197,7 @@ class UsersTableSeeder extends Seeder
                 'email_verified_at' => date('Y-m-d H:i:s'),
             ]
         );
+
         $superAdmin->assignRole($superAdminRole);
 
         // customer
@@ -1281,7 +1260,7 @@ class UsersTableSeeder extends Seeder
             'manage user',
             'create user',
             'edit user',
-            'delete user',
+            'delete user',  
             'manage role',
             'create role',
             'edit role',
@@ -1446,6 +1425,7 @@ class UsersTableSeeder extends Seeder
             'create constant contract type',
             'edit constant contract type',
             'delete constant contract type',
+            
 
         ];
 

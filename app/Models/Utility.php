@@ -41,9 +41,9 @@ class Utility extends Model
         }
         $data = self::$Setting;
         $settings = [
-            "site_currency" => "USD",
-            "site_currency_symbol" => "$",
-            "site_currency_symbol_position" => "pre",
+            "site_currency" => "AED",
+            "site_currency_symbol" => "AED",
+            "site_currency_symbol_position" => "post",
             "site_date_format" => "M j, Y",
             "site_time_format" => "g:i A",
             "company_name" => "",
@@ -233,11 +233,11 @@ class Utility extends Model
         $data = self::$settingById;
 
         $settings = [
-            "site_currency" => "USD",
-            "currency" => "USD",
-            "currency_symbol" => "$",
-            "site_currency_symbol" => "$",
-            "site_currency_symbol_position" => "pre",
+            "site_currency" => "AED",
+            "currency" => "AED",
+            "currency_symbol" => "AED",
+            "site_currency_symbol" => "AED",
+            "site_currency_symbol_position" => "post",
             "site_date_format" => "M j, Y",
             "site_time_format" => "g:i A",
             "company_name" => "",
@@ -326,19 +326,19 @@ class Utility extends Model
     {
         $arr = [
             'ar' => '🇦🇪 ar',
-            'da' => '🇩🇰 da',
-            'de' => '🇩🇪 de',
-            'es' => '🇪🇸 es',
-            'fr' => '🇫🇷 fr',
-            'it' => '🇮🇹 it',
-            'ja' => '🇯🇵 ja',
-            'nl' => '🇳🇱 nl',
-            'pl' => '🇵🇱 pl',
-            'ru' => '🇷🇺 ru',
-            'pt' => '🇵🇹 pt',
+            // 'da' => '🇩🇰 da',
+            // 'de' => '🇩🇪 de',
+            // 'es' => '🇪🇸 es',
+            // 'fr' => '🇫🇷 fr',
+            // 'it' => '🇮🇹 it',
+            // 'ja' => '🇯🇵 ja',
+            // 'nl' => '🇳🇱 nl',
+            // 'pl' => '🇵🇱 pl',
+            // 'ru' => '🇷🇺 ru',
+            // 'pt' => '🇵🇹 pt',
             'en' => '🇮🇳 en',
-            'tr' => '🇹🇷 tr',
-            'pt-br' => '🇵🇹 pt-br',
+            // 'tr' => '🇹🇷 tr',
+            // 'pt-br' => '🇵🇹 pt-br',
         ];
         return $arr;
     }
@@ -361,21 +361,21 @@ class Utility extends Model
     {
         $languages = [
             "ar" => "Arabic",
-            "zh" => "Chinese",
-            "da" => "Danish",
-            "de" => "German",
+            // "zh" => "Chinese",
+            // "da" => "Danish",
+            // "de" => "German",
             "en" => "English",
-            "es" => "Spanish",
-            "fr" => "French",
-            "he" => "Hebrew",
-            "it" => "Italian",
-            "ja" => "Japanese",
-            "nl" => "Dutch",
-            "pl" => "Polish",
-            "pt" => "Portuguese",
-            "ru" => "Russian",
-            "tr" => "Turkish",
-            "pt-br" => "Portuguese(Brazil)"
+            // "es" => "Spanish",
+            // "fr" => "French",
+            // "he" => "Hebrew",
+            // "it" => "Italian",
+            // "ja" => "Japanese",
+            // "nl" => "Dutch",
+            // "pl" => "Polish",
+            // "pt" => "Portuguese",
+            // "ru" => "Russian",
+            // "tr" => "Turkish",
+            // "pt-br" => "Portuguese(Brazil)"
         ];
         return $languages;
     }
@@ -405,7 +405,7 @@ class Utility extends Model
                     $disabledlang = explode(',', $settings['disable_lang']);
                     $languages = Language::whereNotIn('code', $disabledlang)->pluck('fullName', 'code');
                 } else {
-                    $languages = Language::pluck('fullname', 'code');
+                    $languages = Language::where('status',1)->pluck('fullname', 'code');
                 }
                 self::$languageSetting = $languages;
             }
@@ -1852,7 +1852,8 @@ class Utility extends Model
                     $name = $name;
 
                     if ($settings['storage_setting'] == 'local') {
-                        $request->$key_name->move(storage_path($path), $name);
+                        $request->$key_name->move(storage_path('app/public/'.$path), $name);
+                        // $request->file($key_name)->storeAs($path, $name, 'public'); // Store in 'storage/app/public/uploads/avatar/'
                         $path = $path . $name;
                     } else if ($settings['storage_setting'] == 'wasabi') {
 

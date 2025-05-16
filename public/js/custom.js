@@ -128,21 +128,56 @@ function show_toastr(type, message) {
     $('#liveToast .toast-body').html(message);
 }
 
-$(document).on('click', 'a[data-ajax-popup="true"], button[data-ajax-popup="true"], div[data-ajax-popup="true"]', function () {
+// $(document).on('click', 'a[data-ajax-popup="true"], button[data-ajax-popup="true"], div[data-ajax-popup="true"]', function () {
 
+//     var title1 = $(this).data("title");
+//     var title2 = $(this).data("bs-original-title");
+//     var title = (title1 != undefined) ? title1 : title2;
+//     var size = ($(this).data('size') == '') ? 'md' : $(this).data('size');
+//     var url = $(this).data('url');
+//     $("#commonModal .modal-title").html(title);
+//     $("#commonModal .modal-dialog").addClass('modal-' + size);
+//     $.ajax({
+//         url: url,
+//         success: function (data) {
+//             $('#commonModal .body').html(data);
+//             $("#commonModal").modal('show');
+//             // daterange_set();
+//             taskCheckbox();
+//             validation();
+//             common_bind("#commonModal");
+//             setTimeout(function () {
+//                 commonLoader();
+//             }, 600);
+//             select2();
+//         },
+//         error: function (data) {
+//             data = data.responseJSON;
+//             show_toastr('error', data.error, 'error')
+//         }
+//     });
+
+// });
+$(document).on('click', 'a[data-ajax-popup="true"], button[data-ajax-popup="true"], div[data-ajax-popup="true"]', function () {
     var title1 = $(this).data("title");
     var title2 = $(this).data("bs-original-title");
-    var title = (title1 != undefined) ? title1 : title2;
-    var size = ($(this).data('size') == '') ? 'md' : $(this).data('size');
+    var title = (title1 !== undefined) ? title1 : title2;
     var url = $(this).data('url');
-    $("#commonModal .modal-title").html(title);
-    $("#commonModal .modal-dialog").addClass('modal-' + size);
+
+    // Update the offcanvas title
+    $("#commonModal .offcanvas-title").html(title);
+
     $.ajax({
         url: url,
         success: function (data) {
-            $('#commonModal .body').html(data);
-            $("#commonModal").modal('show');
-            // daterange_set();
+            $('#commonModal .offcanvas-body').html(data);
+
+            // Show the offcanvas using Bootstrap's API
+            var offcanvasEl = document.getElementById('commonModal');
+            var bsOffcanvas = new bootstrap.Offcanvas(offcanvasEl);
+            bsOffcanvas.show();
+
+            // Call necessary functions after content is loaded
             taskCheckbox();
             validation();
             common_bind("#commonModal");
@@ -153,11 +188,11 @@ $(document).on('click', 'a[data-ajax-popup="true"], button[data-ajax-popup="true
         },
         error: function (data) {
             data = data.responseJSON;
-            show_toastr('error', data.error, 'error')
+            show_toastr('error', data.error, 'error');
         }
     });
-
 });
+
 
 
 function arrayToJson(form) {
@@ -440,8 +475,8 @@ $(document).on('click', 'a[data-ajax-popup-over="true"], button[data-ajax-popup-
 
 });
 
-$(document).ready(function() {
-    $(document).on("change",".file-validate",function(){
+$(document).ready(function () {
+    $(document).on("change", ".file-validate", function () {
         validate_file();
     });
 
